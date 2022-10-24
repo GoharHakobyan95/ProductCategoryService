@@ -5,12 +5,11 @@ import com.example.productcategoryservice.dto.ProductResponseDto;
 import com.example.productcategoryservice.dto.UpdateProductDto;
 import com.example.productcategoryservice.entity.Product;
 import org.mapstruct.Mapper;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring")
-@Component
+
 public interface ProductMapper {
     Product map(CreateProductDto createProductDto);
 
