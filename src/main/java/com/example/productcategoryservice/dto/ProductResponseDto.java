@@ -1,6 +1,7 @@
 package com.example.productcategoryservice.dto;
 
 import com.example.productcategoryservice.entity.Category;
+import com.example.productcategoryservice.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,4 +16,5 @@ public class ProductResponseDto {
     private String title;
     private double price;
     private Category category;
+    private User user;
 }
