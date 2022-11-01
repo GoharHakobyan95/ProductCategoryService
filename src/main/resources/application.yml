@@ -1,0 +1,12 @@
+spring:
+ liquibase:
+  change-log: classpath:/db/changelog/migration.xml
+
+ datasource:
+   url: jdbc:mysql://localhost:3306/product_category_service
+   username: root
+   password: root
+
+jwt:
+  secret: gh552778au%
+  expiration: 333000
