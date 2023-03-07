@@ -1,13 +1,12 @@
 package com.example.productcategoryservice.service;
 
 import com.example.productcategoryservice.entity.Category;
-import com.example.productcategoryservice.exception.ApiError;
+import com.example.productcategoryservice.exception.Error;
+import com.example.productcategoryservice.exception.EntityNotFoundException;
 import com.example.productcategoryservice.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,10 +19,10 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
 
-    public Category findCatById(int id) throws ApiError {
+    public Category findCatById(int id) {
         Optional<Category> byId = categoryRepository.findById(id);
         if (byId.isEmpty()) {
-            throw new ApiError(HttpStatus.NOT_FOUND, 404, LocalDateTime.now(), "The requested resource does not exist");
+            throw new EntityNotFoundException(Error.DIRECTORY_NOT_FOUND);
         }
         return categoryRepository.findById(id).get();
     }
@@ -32,12 +31,12 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
-    public void deleteCatById(int id) throws ApiError {
+    public void deleteCatById(int id){
         Optional<Category> catById = categoryRepository.findById(id);
         if (catById.isPresent()) {
             categoryRepository.deleteById(id);
         } else {
-            throw new ApiError(HttpStatus.NOT_FOUND, 404, LocalDateTime.now(), "The requested resource does not exist");
+            throw new EntityNotFoundException(Error.DIRECTORY_NOT_FOUND);
         }
     }
 }

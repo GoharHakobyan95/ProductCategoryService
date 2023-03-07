@@ -1,22 +1,25 @@
 package com.example.productcategoryservice.endpoint;
 
-import com.example.productcategoryservice.dto.*;
+
+import com.example.productcategoryservice.dto.CreateProductDto;
+import com.example.productcategoryservice.dto.ProductResponseDto;
+import com.example.productcategoryservice.dto.UpdateProductDto;
 import com.example.productcategoryservice.entity.Product;
-import com.example.productcategoryservice.entity.User;
 import com.example.productcategoryservice.exception.ApiError;
+import com.example.productcategoryservice.exception.BaseException;
 import com.example.productcategoryservice.mapper.ProductMapper;
 import com.example.productcategoryservice.security.CurrentUser;
 import com.example.productcategoryservice.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+
 
 @RequiredArgsConstructor
 @RequestMapping("/api/products")
@@ -26,16 +29,17 @@ public class ProductEndpoint {
 
     private final ProductMapper productMapper;
 
+
     @GetMapping
     public ResponseEntity<?> getAllCategories() {
         return ResponseEntity.ok(productMapper.map(productService.getAllProducts()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResponseDto> getProductById(@PathVariable("id") int id) throws ApiError {
+    public ResponseEntity<ProductResponseDto> getProductById(@PathVariable("id") int id) throws BaseException {
         try {
             return ResponseEntity.ok(productMapper.map(productService.findById(id)));
-        } catch (ApiError exc) {
+        } catch (BaseException exc) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found", exc);
         }
     }
@@ -49,24 +53,20 @@ public class ProductEndpoint {
     @PostMapping
     public ResponseEntity<Product> createProduct(@AuthenticationPrincipal CurrentUser currentUser,
                                                  @RequestBody CreateProductDto createProductDto) {
-        User user = currentUser.getUser();
-        UserDto userDto = new UserDto();
-        userDto.setId(user.getId());
-        userDto.setName(user.getName());
-        userDto.setSurname(user.getSurname());
-        userDto.setPhone(user.getPhone());
-        userDto.setRole(user.getRole());
-        createProductDto.setUserDto(userDto);
-        return ResponseEntity.ok(productService.saveProduct(productMapper.map(createProductDto)));
-
+        Product userProduct = productMapper.map(createProductDto);
+        userProduct.setUser(currentUser.getUser());
+        return ResponseEntity.ok(productService.saveProduct(userProduct));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Product> updateProduct(@AuthenticationPrincipal CurrentUser currentUser,
                                                  @RequestBody UpdateProductDto updateProductDto,
                                                  @PathVariable("id") int id) throws ApiError {
+        Product userProduct = productMapper.map(updateProductDto);
+        userProduct.setUser(currentUser.getUser());
+        productService.saveProduct(userProduct);
         Optional<Product> productById = productService.findProductById(id);
-        if (currentUser.getUser().getId() == productById.get().getUser().getId()) {
+        if (productById.isPresent() && currentUser.getUser().getId() == productById.get().getUser().getId()) {
             return ResponseEntity.ok((productService.saveProduct(productMapper.map(updateProductDto))));
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -74,12 +74,12 @@ public class ProductEndpoint {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteCategoryById(@AuthenticationPrincipal CurrentUser currentUser,
-                                                @PathVariable("id") int id) {
+    public ResponseEntity<?> deleteCategoryById( @PathVariable("id") int id,
+                                                 @AuthenticationPrincipal CurrentUser currentUser) {
         try {
-            productService.deleteProductById(id, currentUser.getUser().getId());
+            productService.deleteProductById(id, currentUser);
             return ResponseEntity.ok(productMapper.map(productService.getAllProducts()));
-        } catch (ApiError exc) {
+        } catch (BaseException exc) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found", exc);
         }
     }

@@ -11,6 +11,7 @@ import com.example.productcategoryservice.security.UserDetailServiceImpl;
 import com.example.productcategoryservice.service.UserService;
 import com.example.productcategoryservice.util.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -29,6 +30,7 @@ import java.util.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user")
+@Slf4j
 public class UserEndpoint {
     private final UserService userService;
     private final UserMapper userMapper;
@@ -55,6 +57,7 @@ public class UserEndpoint {
         Optional<User> byEmail = userService.findByEmail(userAuthdto.getEmail());
         User user = byEmail.get();
         if (passwordEncoder.matches(userAuthdto.getPassword(), user.getPassword())) {
+            log.info("User with username {} get auth token", user.getEmail());
             return ResponseEntity.ok(UserAuthResponseDto.builder()
                     .token(tokenUtil.generateToken(user.getEmail()))
                     .user(userMapper.map(user))

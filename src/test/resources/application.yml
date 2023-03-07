@@ -1,0 +1,21 @@
+spring:
+  liquibase:
+    change-log: classpath:/db/changelog/migration.xml
+  datasource:
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password: password
+    driver-class-name: org.h2.Driver
+  jpa:
+      database-platform: org.hibernate.dialect.H2Dialect
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+
+jwt:
+  secret: gh552778au%
+  expiration: 333000
+
+
+cb:
+  url: https://cb.am/latest.json.php
